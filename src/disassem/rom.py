@@ -37,6 +37,33 @@ mne354 = {
     0b0000010010: "X"
 }
 
+mne355 = {
+    0b001100: "LDCR",
+    0b001101: "STCR"
+}
+
+mne356 = {
+    0b00011101: "SBO",
+    0b00011110: "SBZ",
+    0b00011111: "TB"
+}
+
+mne357 = {
+    0b00010011: "JEQ",
+    0b00010101: "JGT",
+    0b00011011: "JH",
+    0b00010100: "JHE",
+    0b00011010: "JL",
+    0b00010010: "JLE",
+    0b00010001: "JLT",
+    0b00010000: "JMP",
+    0b00010111: "JNC",
+    0b00010110: "JNE",
+    0b00011001: "JNO",
+    0b00011000: "JOC",
+    0b00011100: "JOP"
+}
+
 
 class ROM:
     def __init__(self, rompath, listpath):
@@ -79,6 +106,18 @@ class ROM:
         ts = (word & 0x0030) >> 4
         s = word & 0x000F
         return (opcode, ts, s)
+
+    def deconstruct355(self, word):
+        opcode = (word & 0xFC00) >> 10
+        c = (word & 0x03C0) >> 6
+        ts = (word & 0x0030) >> 4
+        s = word & 0x000F
+        return (opcode, c, ts, s)
+
+    def deconstruct356(self, word):
+        opcode = (word & 0xFF00) >> 8
+        dis = word & 0x00FF
+        return (opcode, dis)
 
     def param351(self, t, v, rom):
         param = ""
@@ -140,6 +179,32 @@ class ROM:
         print(line, file=listing)
         return True
 
+    def handle355(self, word, listing, rom):
+        (opcode, c, ts, s) = self.deconstruct355(word)
+        if opcode not in mne355.keys():
+            return False
+        src_param = self.param351(ts, s, rom)
+        line = "\t%s\t%s,%s" % (mne355[opcode], src_param, str(c))
+        print(line, file=listing)
+        return True
+
+    def handle356(self, word, listing, rom):
+        (opcode, dis) = self.deconstruct356(word)
+        if opcode not in mne356.keys():
+            return False
+        line = "\t%s\t%s" % (mne356[opcode], str(dis))
+        print(line, file=listing)
+        return True
+
+    def handle357(self, word, listing, rom):
+        (opcode, dis) = self.deconstruct356(word)
+        if opcode not in mne357.keys():
+            return False
+        # todo: track PC, and adjust displacement
+        line = "\t%s\t%s" % (mne357[opcode], dis)
+        print(line, file=listing)
+        return True
+
     def handleData(self, word, listing):
         line = "\tDATA\t%s" % self.word_to_hex(word)
         print(line, file=listing)
@@ -154,6 +219,9 @@ class ROM:
                     self.handle352(word, listing, rom)
                     self.handle353(word, listing, rom)
                     self.handle354(word, listing, rom)
+                    self.handle355(word, listing, rom)
+                    self.handle356(word, listing, rom)
+                    self.handle357(word, listing, rom)
                     self.handleData(word, listing)
 
                     word = self.readword(rom)
