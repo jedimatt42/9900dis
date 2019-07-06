@@ -16,6 +16,27 @@ mne352 = {
     0b001111: "DIV"
 }
 
+mne353 = {
+    0b001011: "XOP"
+}
+
+mne354 = {
+    0b0000010001: "B",
+    0b0000011010: "BL",
+    0b0000010000: "BLWP",
+    0b0000010011: "CLR",
+    0b0000011100: "SETO",
+    0b0000010101: "INV",
+    0b0000010100: "NEG",
+    0b0000011101: "ABS",
+    0b0000011011: "SWPB",
+    0b0000010110: "INC",
+    0b0000010111: "INCT",
+    0b0000011000: "DEC",
+    0b0000011001: "DECT",
+    0b0000010010: "X"
+}
+
 
 class ROM:
     def __init__(self, rompath, listpath):
@@ -52,6 +73,12 @@ class ROM:
         ts = (word & 0x0030) >> 4
         s = (word & 0x000F)
         return (opcode, d, ts, s)
+
+    def deconstruct354(self, word):
+        opcode = (word & 0xFFC0) >> 6
+        ts = (word & 0x0030) >> 4
+        s = word & 0x000F
+        return (opcode, ts, s)
 
     def param351(self, t, v, rom):
         param = ""
@@ -93,6 +120,26 @@ class ROM:
         print(line, file=listing)
         return True
 
+    def handle353(self, word, listing, rom):
+        # same format as section 3.5.2
+        (opcode, d, ts, s) = self.deconstruct352(word)
+        if opcode not in mne353.keys():
+            return False
+        src_param = self.param351(ts, s, rom)
+        dst_param = "r" + str(d)
+        line = "\t%s\t%s,%s" % (mne353[opcode], src_param, dst_param)
+        print(line, file=listing)
+        return True
+
+    def handle354(self, word, listing, rom):
+        (opcode, ts, s) = self.deconstruct354(word)
+        if opcode not in mne354.keys():
+            return False
+        src_param = self.param351(ts, s, rom)
+        line = "\t%s\t%s" % (mne354[opcode], src_param)
+        print(line, file=listing)
+        return True
+
     def handleData(self, word, listing):
         line = "\tDATA\t%s" % self.word_to_hex(word)
         print(line, file=listing)
@@ -105,6 +152,8 @@ class ROM:
                 while(word is not None):
                     self.handle351(word, listing, rom)
                     self.handle352(word, listing, rom)
+                    self.handle353(word, listing, rom)
+                    self.handle354(word, listing, rom)
                     self.handleData(word, listing)
 
                     word = self.readword(rom)
