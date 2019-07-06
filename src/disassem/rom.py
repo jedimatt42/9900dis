@@ -34,7 +34,7 @@ class ROM:
     def deconstruct351(self, word):
         opcode = (word & 0xE000) >> 13
         b = (word & 0x1000) >> 12
-        td = (word & 0x0C00) >> 8
+        td = (word & 0x0C00) >> 10
         d = (word & 0x03C0) >> 6
         ts = (word & 0x0030) >> 4
         s = word & 0x000F
@@ -56,7 +56,7 @@ class ROM:
     def param351(self, t, v, rom):
         param = ""
         if t == 2:
-            param = self.word_to_hex(self.readword(rom))
+            param = "@" + self.word_to_hex(self.readword(rom))
             if v != 0:
                 param += "(r"
                 param += str(v)
@@ -69,6 +69,7 @@ class ROM:
             if t == 3:
                 param += "+"
             return param
+        return "error(t_%d)" % t
 
     def handle351(self, word, listing, rom):
         (opcode, b, td, d, ts, s) = self.deconstruct351(word)
@@ -86,7 +87,9 @@ class ROM:
         (opcode, d, ts, s) = self.deconstruct352(word)
         if opcode not in mne352.keys():
             return False
-        line = "\t%s" % mne352[opcode]
+        src_param = self.param351(ts, s, rom)
+        dst_param = "r" + str(d)
+        line = "\t%s\t%s,%s" % (mne352[opcode], src_param, dst_param)
         print(line, file=listing)
         return True
 
