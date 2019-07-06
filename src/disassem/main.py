@@ -28,7 +28,7 @@ from rom import ROM
 @click.version_option()
 def main(rom, listing, aorg):
     """TMS9900 disassembler by Jedimatt42"""
-    disassembler = ROM(rom, listing)
+    disassembler = ROM(rom, listing, aorg)
     disassembler.disassemble()
 
 if __name__ == "__main__":

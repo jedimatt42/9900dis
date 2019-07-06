@@ -65,15 +65,24 @@ mne357 = {
 }
 
 
+def signedByte(value):
+    if value > 127:
+        return (256-value) * (-1)
+    else:
+        return value
+
+
 class ROM:
-    def __init__(self, rompath, listpath):
+    def __init__(self, rompath, listpath, aorg):
         self.filename = rompath
         self.output = listpath
+        self.pc = aorg.as_int()
 
     def readword(self, rom):
         bytes = rom.read(2)
         if bytes == b"":
             return None
+        self.pc += 2
         return (bytes[0] << 8) + bytes[1]
 
     def word_to_hex(self, value):
@@ -201,7 +210,8 @@ class ROM:
         if opcode not in mne357.keys():
             return False
         # todo: track PC, and adjust displacement
-        line = "\t%s\t%s" % (mne357[opcode], dis)
+        addr = signedByte(dis) + self.pc
+        line = "\t%s\t%s" % (mne357[opcode], self.word_to_hex(addr))
         print(line, file=listing)
         return True
 

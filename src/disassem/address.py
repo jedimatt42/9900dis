@@ -4,3 +4,6 @@ class Address:
 
     def __str__(self):
         return "{0:#0{1}x}".format(self.value, 6)
+
+    def as_int(self):
+        return self.value
