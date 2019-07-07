@@ -93,6 +93,14 @@ mne3512 = {
     0b00000011100: "RTWP"
 }
 
+mne3513 = {
+    0b00000011010: "IDLE",
+    0b00000011011: "RSET",
+    0b00000011110: "CKOF",
+    0b00000011101: "CKON",
+    0b00000011111: "LREX"
+}
+
 
 def signedByte(value):
     if value > 127:
@@ -310,6 +318,14 @@ class ROM:
         print(line, file=listing)
         return True
 
+    def handle3513(self, word, listing, rom):
+        opcode = self.deconstruct3512(word)
+        if opcode not in mne3513.keys():
+            return False
+        line = "\t%s" % mne3513[opcode]
+        print(line, file=listing)
+        return True
+
     def handleData(self, word, listing):
         line = "\tDATA\t%s" % self.word_to_hex(word)
         print(line, file=listing)
@@ -332,6 +348,7 @@ class ROM:
                     self.handle3510(word, listing, rom)
                     self.handle3511(word, listing, rom)
                     self.handle3512(word, listing, rom)
+                    self.handle3513(word, listing, rom)
                     self.handleData(word, listing)
 
                     word = self.readword(rom)
