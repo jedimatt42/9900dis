@@ -101,6 +101,11 @@ mne3513 = {
     0b00000011111: "LREX"
 }
 
+mne_9995_453 = {
+    0b0000000111: "MPYS",
+    0b0000000110: "DIVS"
+}
+
 
 def signedByte(value):
     if value > 127:
@@ -326,6 +331,15 @@ class ROM:
         print(line, file=listing)
         return True
 
+    def handle_9995_453(self, word, listing, rom):
+        (opcode, ts, s) = self.deconstruct354(word)
+        if opcode not in mne_9995_453.keys():
+            return False
+        src_param = self.param351(ts, s, rom)
+        line = "\t%s\t%s" % (mne_9995_453[opcode], src_param)
+        print(line, file=listing)
+        return True
+
     def handleData(self, word, listing):
         line = "\tDATA\t%s" % self.word_to_hex(word)
         print(line, file=listing)
@@ -349,6 +363,7 @@ class ROM:
                     self.handle3511(word, listing, rom)
                     self.handle3512(word, listing, rom)
                     self.handle3513(word, listing, rom)
+                    self.handle_9995_453(word, listing, rom)
                     self.handleData(word, listing)
 
                     word = self.readword(rom)
