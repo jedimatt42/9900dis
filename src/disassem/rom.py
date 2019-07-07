@@ -71,6 +71,24 @@ mne358 = {
     0b00001001: "SRL"
 }
 
+mne359 = {
+    0b00000010001: "AI",
+    0b00000010010: "ANDI",
+    0b00000010100: "CI",
+    0b00000010000: "LI",
+    0b00000010011: "ORI"
+}
+
+mne3510 = {
+    0b00000010111: "LWPI",
+    0b00000011000: "LIMI"
+}
+
+mne3511 = {
+    0b00000010110: "STST",
+    0b00000010101: "STWP"
+}
+
 
 def signedByte(value):
     if value > 127:
@@ -140,6 +158,21 @@ class ROM:
         c = (word & 0x00F0) >> 4
         w = word & 0x000F
         return (opcode, c, w)
+
+    def deconstruct359(self, word):
+        opcode = (word & 0xFFE0) >> 5
+        n = (word & 0x0010) >> 4
+        w = word & 0x000F
+        return (opcode, n, w)
+
+    def deconstruct3510(self, word):
+        opcode = (word & 0xFFE0) >> 5
+        return opcode
+    
+    def deconstruct3511(self, word):
+        opcode = (word & 0xFFE0) >> 5
+        w = word & 0x000F
+        return (opcode, w)
 
     def param351(self, t, v, rom):
         param = ""
@@ -235,6 +268,32 @@ class ROM:
         print(line, file=listing)
         return True
 
+    def handle359(self, word, listing, rom):
+        (opcode, n, w) = self.deconstruct359(word)
+        if opcode not in mne359.keys():
+            return False
+        iop = self.readword(rom)
+        line = "\t%s\tr%d,%s" % (mne359[opcode], w, self.word_to_hex(iop))
+        print(line, file=listing)
+        return True
+
+    def handle3510(self, word, listing, rom):
+        opcode = self.deconstruct3510(word)
+        if opcode not in mne3510.keys():
+            return False
+        iop = self.readword(rom)
+        line = "\t%s\t%s" % (mne3510[opcode], self.word_to_hex(iop))
+        print(line, file=listing)
+        return True
+
+    def handle3511(self, word, listing, rom):
+        (opcode, w) = self.deconstruct3511(word)
+        if opcode not in mne3511.keys():
+            return False
+        line = "\t%s\tr%d" % (mne3511[opcode], w)
+        print(line, file=listing)
+        return True 
+
     def handleData(self, word, listing):
         line = "\tDATA\t%s" % self.word_to_hex(word)
         print(line, file=listing)
@@ -253,6 +312,9 @@ class ROM:
                     self.handle356(word, listing, rom)
                     self.handle357(word, listing, rom)
                     self.handle358(word, listing, rom)
+                    self.handle359(word, listing, rom)
+                    self.handle3510(word, listing, rom)
+                    self.handle3511(word, listing, rom)
                     self.handleData(word, listing)
 
                     word = self.readword(rom)
