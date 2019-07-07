@@ -213,7 +213,7 @@ class ROM:
             return param
         return "error(t_%d)" % t
 
-    def handle351(self, word, listing, rom):
+    def handle351(self, word, rom):
         (opcode, b, td, d, ts, s) = self.deconstruct351(word)
         if opcode not in mne351.keys():
             return False
@@ -222,20 +222,18 @@ class ROM:
         line = "\t%s\t%s,%s" % (
             self.mneumonic351(opcode, b), src_param, dst_param
         )
-        print(line, file=listing)
-        return True
+        return line
 
-    def handle352(self, word, listing, rom):
+    def handle352(self, word, rom):
         (opcode, d, ts, s) = self.deconstruct352(word)
         if opcode not in mne352.keys():
             return False
         src_param = self.param351(ts, s, rom)
         dst_param = "r" + str(d)
         line = "\t%s\t%s,%s" % (mne352[opcode], src_param, dst_param)
-        print(line, file=listing)
-        return True
+        return line
 
-    def handle353(self, word, listing, rom):
+    def handle353(self, word, rom):
         # same format as section 3.5.2
         (opcode, d, ts, s) = self.deconstruct352(word)
         if opcode not in mne353.keys():
@@ -243,127 +241,123 @@ class ROM:
         src_param = self.param351(ts, s, rom)
         dst_param = "r" + str(d)
         line = "\t%s\t%s,%s" % (mne353[opcode], src_param, dst_param)
-        print(line, file=listing)
-        return True
+        return line
 
-    def handle354(self, word, listing, rom):
+    def handle354(self, word, rom):
         (opcode, ts, s) = self.deconstruct354(word)
         if opcode not in mne354.keys():
             return False
         src_param = self.param351(ts, s, rom)
         line = "\t%s\t%s" % (mne354[opcode], src_param)
-        print(line, file=listing)
-        return True
+        return line
 
-    def handle355(self, word, listing, rom):
+    def handle355(self, word, rom):
         (opcode, c, ts, s) = self.deconstruct355(word)
         if opcode not in mne355.keys():
             return False
         src_param = self.param351(ts, s, rom)
         line = "\t%s\t%s,%s" % (mne355[opcode], src_param, str(c))
-        print(line, file=listing)
-        return True
+        return line
 
-    def handle356(self, word, listing, rom):
+    def handle356(self, word, rom):
         (opcode, dis) = self.deconstruct356(word)
         if opcode not in mne356.keys():
             return False
         line = "\t%s\t%s" % (mne356[opcode], str(dis))
-        print(line, file=listing)
-        return True
+        return line
 
-    def handle357(self, word, listing, rom):
+    def handle357(self, word, rom):
         (opcode, dis) = self.deconstruct356(word)
         if opcode not in mne357.keys():
             return False
         addr = signedByte(dis) + self.pc
         line = "\t%s\t%s" % (mne357[opcode], self.word_to_hex(addr))
-        print(line, file=listing)
-        return True
+        return line
 
-    def handle358(self, word, listing, rom):
+    def handle358(self, word, rom):
         (opcode, c, w) = self.deconstruct358(word)
         if opcode not in mne358.keys():
             return False
         line = "\t%s\tr%d,%d" % (mne358[opcode], w, c)
-        print(line, file=listing)
-        return True
+        return line
 
-    def handle359(self, word, listing, rom):
+    def handle359(self, word, rom):
         (opcode, n, w) = self.deconstruct359(word)
         if opcode not in mne359.keys():
             return False
         iop = self.readword(rom)
         line = "\t%s\tr%d,%s" % (mne359[opcode], w, self.word_to_hex(iop))
-        print(line, file=listing)
-        return True
+        return line
 
-    def handle3510(self, word, listing, rom):
+    def handle3510(self, word, rom):
         opcode = self.deconstruct3510(word)
         if opcode not in mne3510.keys():
             return False
         iop = self.readword(rom)
         line = "\t%s\t%s" % (mne3510[opcode], self.word_to_hex(iop))
-        print(line, file=listing)
-        return True
+        return line
 
-    def handle3511(self, word, listing, rom):
+    def handle3511(self, word, rom):
         (opcode, w) = self.deconstruct3511(word)
         if opcode not in mne3511.keys():
             return False
         line = "\t%s\tr%d" % (mne3511[opcode], w)
-        print(line, file=listing)
-        return True
+        return line
 
-    def handle3512(self, word, listing, rom):
+    def handle3512(self, word, rom):
         opcode = self.deconstruct3512(word)
         if opcode not in mne3512.keys():
             return False
         line = "\t%s" % mne3512[opcode]
-        print(line, file=listing)
-        return True
+        return line
 
-    def handle3513(self, word, listing, rom):
+    def handle3513(self, word, rom):
         opcode = self.deconstruct3512(word)
         if opcode not in mne3513.keys():
             return False
         line = "\t%s" % mne3513[opcode]
-        print(line, file=listing)
-        return True
+        return line
 
-    def handle_9995_453(self, word, listing, rom):
+    def handle_9995_453(self, word, rom):
         (opcode, ts, s) = self.deconstruct354(word)
         if opcode not in mne_9995_453.keys():
             return False
         src_param = self.param351(ts, s, rom)
         line = "\t%s\t%s" % (mne_9995_453[opcode], src_param)
-        print(line, file=listing)
-        return True
+        return line
 
-    def handleData(self, word, listing):
+    def handleData(self, word, _):
         line = "\tDATA\t%s" % self.word_to_hex(word)
-        print(line, file=listing)
-        return True
+        return line
 
     def disassemble(self):
+
+        handlers = [ 
+            self.handle351,
+            self.handle352,
+            self.handle353,
+            self.handle354,
+            self.handle355,
+            self.handle356,
+            self.handle357,
+            self.handle358,
+            self.handle359,
+            self.handle3510,
+            self.handle3511,
+            self.handle3512,
+            self.handle3513,
+            self.handle_9995_453,
+            self.handleData
+        ]
+
         with open(self.output, "w") as listing:
             with open(self.filename, "rb") as rom:
                 word = self.readword(rom)
                 while(word is not None):
-                    self.handle351(word, listing, rom)
-                    self.handle352(word, listing, rom)
-                    self.handle353(word, listing, rom)
-                    self.handle354(word, listing, rom)
-                    self.handle355(word, listing, rom)
-                    self.handle356(word, listing, rom)
-                    self.handle357(word, listing, rom)
-                    self.handle358(word, listing, rom)
-                    self.handle359(word, listing, rom)
-                    self.handle3510(word, listing, rom)
-                    self.handle3511(word, listing, rom)
-                    self.handle3512(word, listing, rom)
-                    self.handle3513(word, listing, rom)
-                    self.handle_9995_453(word, listing, rom)
-                    self.handleData(word, listing)
+                    for handler in handlers:
+                        line = handler(word, rom)
+                        if line:
+                            print(line, file=listing)
+                            break
 
                     word = self.readword(rom)
