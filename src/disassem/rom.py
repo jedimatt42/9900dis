@@ -1,3 +1,4 @@
+from hints import Hints
 
 mne351 = {
     0b101: "A",
@@ -115,10 +116,12 @@ def signedByte(value):
 
 
 class ROM:
-    def __init__(self, rompath, listpath, aorg):
+    def __init__(self, rompath, listpath, aorg, is9995):
         self.filename = rompath
         self.output = listpath
         self.pc = aorg.as_int()
+        self.is9995 = is9995
+        self.hints = Hints(self.output)
 
     def readword(self, rom):
         bytes = rom.read(2)
@@ -211,7 +214,7 @@ class ROM:
             if t == 3:
                 param += "+"
             return param
-        return "error(t_%d)" % t
+        return f"error(t_{t})"
 
     def handle351(self, word, rom):
         (opcode, b, td, d, ts, s) = self.deconstruct351(word)
@@ -219,7 +222,7 @@ class ROM:
             return False
         src_param = self.param351(ts, s, rom)
         dst_param = self.param351(td, d, rom)
-        line = "\t%s\t%s,%s" % (
+        line = "{:8}{},{}".format(
             self.mneumonic351(opcode, b), src_param, dst_param
         )
         return line
@@ -230,7 +233,7 @@ class ROM:
             return False
         src_param = self.param351(ts, s, rom)
         dst_param = "r" + str(d)
-        line = "\t%s\t%s,%s" % (mne352[opcode], src_param, dst_param)
+        line = "{:8}{},{}".format(mne352[opcode], src_param, dst_param)
         return line
 
     def handle353(self, word, rom):
@@ -240,7 +243,7 @@ class ROM:
             return False
         src_param = self.param351(ts, s, rom)
         dst_param = "r" + str(d)
-        line = "\t%s\t%s,%s" % (mne353[opcode], src_param, dst_param)
+        line = "{:8}{},{}".format(mne353[opcode], src_param, dst_param)
         return line
 
     def handle354(self, word, rom):
@@ -248,7 +251,7 @@ class ROM:
         if opcode not in mne354.keys():
             return False
         src_param = self.param351(ts, s, rom)
-        line = "\t%s\t%s" % (mne354[opcode], src_param)
+        line = "{:8}{}".format(mne354[opcode], src_param)
         return line
 
     def handle355(self, word, rom):
@@ -256,14 +259,14 @@ class ROM:
         if opcode not in mne355.keys():
             return False
         src_param = self.param351(ts, s, rom)
-        line = "\t%s\t%s,%s" % (mne355[opcode], src_param, str(c))
+        line = "{:8}{},{}".format(mne355[opcode], src_param, str(c))
         return line
 
     def handle356(self, word, rom):
         (opcode, dis) = self.deconstruct356(word)
         if opcode not in mne356.keys():
             return False
-        line = "\t%s\t%s" % (mne356[opcode], str(dis))
+        line = "{:8}{}".format(mne356[opcode], str(dis))
         return line
 
     def handle357(self, word, rom):
@@ -271,14 +274,14 @@ class ROM:
         if opcode not in mne357.keys():
             return False
         addr = signedByte(dis) + self.pc
-        line = "\t%s\t%s" % (mne357[opcode], self.word_to_hex(addr))
+        line = "{:8}{}".format(mne357[opcode], self.word_to_hex(addr))
         return line
 
     def handle358(self, word, rom):
         (opcode, c, w) = self.deconstruct358(word)
         if opcode not in mne358.keys():
             return False
-        line = "\t%s\tr%d,%d" % (mne358[opcode], w, c)
+        line = "{:8}r{},{}".format(mne358[opcode], w, c)
         return line
 
     def handle359(self, word, rom):
@@ -286,7 +289,7 @@ class ROM:
         if opcode not in mne359.keys():
             return False
         iop = self.readword(rom)
-        line = "\t%s\tr%d,%s" % (mne359[opcode], w, self.word_to_hex(iop))
+        line = "{:8}r{},{}".format(mne359[opcode], w, self.word_to_hex(iop))
         return line
 
     def handle3510(self, word, rom):
@@ -294,45 +297,47 @@ class ROM:
         if opcode not in mne3510.keys():
             return False
         iop = self.readword(rom)
-        line = "\t%s\t%s" % (mne3510[opcode], self.word_to_hex(iop))
+        line = "{:8}{}".format(mne3510[opcode], self.word_to_hex(iop))
         return line
 
     def handle3511(self, word, rom):
         (opcode, w) = self.deconstruct3511(word)
         if opcode not in mne3511.keys():
             return False
-        line = "\t%s\tr%d" % (mne3511[opcode], w)
+        line = "{:8}r{}".format(mne3511[opcode], w)
         return line
 
     def handle3512(self, word, rom):
         opcode = self.deconstruct3512(word)
         if opcode not in mne3512.keys():
             return False
-        line = "\t%s" % mne3512[opcode]
+        line = "{:8}".format(mne3512[opcode])
         return line
 
     def handle3513(self, word, rom):
         opcode = self.deconstruct3512(word)
         if opcode not in mne3513.keys():
             return False
-        line = "\t%s" % mne3513[opcode]
+        line = "{:8}".format(mne3513[opcode])
         return line
 
     def handle_9995_453(self, word, rom):
+        if not self.is9995:
+            return False
         (opcode, ts, s) = self.deconstruct354(word)
         if opcode not in mne_9995_453.keys():
             return False
         src_param = self.param351(ts, s, rom)
-        line = "\t%s\t%s" % (mne_9995_453[opcode], src_param)
+        line = "{:8}{}".format(mne_9995_453[opcode], src_param)
         return line
 
     def handleData(self, word, _):
-        line = "\tDATA\t%s" % self.word_to_hex(word)
+        line = "DATA    {}".format(self.word_to_hex(word))
         return line
 
     def disassemble(self):
 
-        handlers = [ 
+        handlers = [
             self.handle351,
             self.handle352,
             self.handle353,
@@ -351,13 +356,21 @@ class ROM:
         ]
 
         with open(self.output, "w") as listing:
+            print("\tAORG\t%s" % self.word_to_hex(self.pc), file=listing)
+
             with open(self.filename, "rb") as rom:
+                pc = self.pc
                 word = self.readword(rom)
                 while(word is not None):
                     for handler in handlers:
                         line = handler(word, rom)
                         if line:
-                            print(line, file=listing)
+                            print("\t{:24} ; pc:{} w:{} {}".format(
+                                    line,
+                                    self.word_to_hex(pc),
+                                    self.word_to_hex(word),
+                                    self.hints.format_note(pc)
+                                ), file=listing)
                             break
-
+                    pc = self.pc
                     word = self.readword(rom)

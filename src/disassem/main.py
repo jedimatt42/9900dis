@@ -25,11 +25,21 @@ from rom import ROM
         help="the address of the first byte in the input ROM. Specified in hex such as 0x0000",
         type=Address
 )
-@click.version_option()
-def main(rom, listing, aorg):
+@click.option(
+        "--cpu",
+        default="9900",
+        help="cpu type, one of 9900 or 9995. Defaults to 9900"
+)
+@click.version_option(
+        version="0.1",
+        prog_name="9900dis"
+)
+def main(rom, listing, aorg, cpu):
     """TMS9900 disassembler by Jedimatt42"""
-    disassembler = ROM(rom, listing, aorg)
+    
+    disassembler = ROM(rom, listing, aorg, cpu == "9995")
     disassembler.disassemble()
+
 
 if __name__ == "__main__":
     main()
