@@ -64,6 +64,13 @@ mne357 = {
     0b00011100: "JOP"
 }
 
+mne358 = {
+    0b00001010: "SLA",
+    0b00001000: "SRA",
+    0b00001011: "SRC",
+    0b00001001: "SRL"
+}
+
 
 def signedByte(value):
     if value > 127:
@@ -127,6 +134,12 @@ class ROM:
         opcode = (word & 0xFF00) >> 8
         dis = word & 0x00FF
         return (opcode, dis)
+
+    def deconstruct358(self, word):
+        opcode = (word & 0xFF00) >> 8
+        c = (word & 0x00F0) >> 4
+        w = word & 0x000F
+        return (opcode, c, w)
 
     def param351(self, t, v, rom):
         param = ""
@@ -209,9 +222,16 @@ class ROM:
         (opcode, dis) = self.deconstruct356(word)
         if opcode not in mne357.keys():
             return False
-        # todo: track PC, and adjust displacement
         addr = signedByte(dis) + self.pc
         line = "\t%s\t%s" % (mne357[opcode], self.word_to_hex(addr))
+        print(line, file=listing)
+        return True
+
+    def handle358(self, word, listing, rom):
+        (opcode, c, w) = self.deconstruct358(word)
+        if opcode not in mne358.keys():
+            return False
+        line = "\t%s\tr%d,%d" % (mne358[opcode], w, c)
         print(line, file=listing)
         return True
 
@@ -232,6 +252,7 @@ class ROM:
                     self.handle355(word, listing, rom)
                     self.handle356(word, listing, rom)
                     self.handle357(word, listing, rom)
+                    self.handle358(word, listing, rom)
                     self.handleData(word, listing)
 
                     word = self.readword(rom)
