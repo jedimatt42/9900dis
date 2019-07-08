@@ -9,6 +9,11 @@ class Hints:
                     (pc, w, f) = self.deconstruct_notes(segments[1])
                     if f:
                         self.annotations[pc] = f.rstrip()
+                label = segments[0].split('\t')[0]
+                if label:
+                    parts = segments[1].split(" ")
+                    pc = int(parts[1][4:], 16)
+                    self.labels[pc] = label.strip()
 
     def deconstruct_notes(self, value):
         parts = value.split(" ")
@@ -16,11 +21,15 @@ class Hints:
             return (None, None, None)
         pc = int(parts[1][4:], 16)
         w = int(parts[2][3:], 16)
-        f = parts[3][2:]
+        f = parts[3]
         return (pc, w, f)
 
     def format_note(self, pc):
         if pc is not None and pc in self.annotations.keys():
-            return "f:{}".format(self.annotations[pc])
-        else:
-            return ""
+            return self.annotations[pc]
+        return ""
+
+    def label(self, pc):
+        if pc is not None and pc in self.labels.keys():
+            return self.labels[pc]
+        return ""

@@ -107,6 +107,11 @@ mne_9995_453 = {
     0b0000000110: "DIVS"
 }
 
+mne_9995_4512 = {
+    0b000000001000: "LST",
+    0b000000001001: "LWP"
+}
+
 
 def signedByte(value):
     if value > 127:
@@ -122,6 +127,7 @@ class ROM:
         self.pc = aorg.as_int()
         self.is9995 = is9995
         self.hints = Hints(self.output)
+        print(f"aorg: {aorg}, 9995: {is9995}")
 
     def readword(self, rom):
         bytes = rom.read(2)
@@ -132,6 +138,12 @@ class ROM:
 
     def word_to_hex(self, value):
         return ">" + "{0:#0{1}x}".format(value, 6)[2:]
+
+    def hex_or_label(self, value):
+        label = self.hints.label(value)
+        if label:
+            return label
+        return self.word_to_hex(value)
 
     def deconstruct351(self, word):
         opcode = (word & 0xE000) >> 13
@@ -188,7 +200,7 @@ class ROM:
     def deconstruct3510(self, word):
         opcode = (word & 0xFFE0) >> 5
         return opcode
-    
+
     def deconstruct3511(self, word):
         opcode = (word & 0xFFE0) >> 5
         w = word & 0x000F
@@ -198,10 +210,15 @@ class ROM:
         opcode = (word & 0xFFE0) >> 5
         return opcode
 
+    def deconstruct9995_4512(self, word):
+        opcode = (word & 0xFFF0) >> 4
+        w = word & 0x000F
+        return (opcode, w)
+
     def param351(self, t, v, rom):
         param = ""
         if t == 2:
-            param = "@" + self.word_to_hex(self.readword(rom))
+            param = "@" + self.hex_or_label(self.readword(rom))
             if v != 0:
                 param += "(r"
                 param += str(v)
@@ -274,7 +291,7 @@ class ROM:
         if opcode not in mne357.keys():
             return False
         addr = signedByte(dis) + self.pc
-        line = "{:8}{}".format(mne357[opcode], self.word_to_hex(addr))
+        line = "{:8}{}".format(mne357[opcode], self.hex_or_label(addr))
         return line
 
     def handle358(self, word, rom):
@@ -322,6 +339,9 @@ class ROM:
         return line
 
     def handle_9995_453(self, word, rom):
+        """
+        Handle 9995 additional signed MPYS and DIVS instructions
+        """
         if not self.is9995:
             return False
         (opcode, ts, s) = self.deconstruct354(word)
@@ -331,18 +351,29 @@ class ROM:
         line = "{:8}{}".format(mne_9995_453[opcode], src_param)
         return line
 
+    def handle_9995_4512(self, word, rom):
+        """
+        Handle 9995 additional LST and LWP instructions
+        """
+        if not self.is9995:
+            return False
+        (opcode, w) = self.deconstruct9995_4512(word)
+        if opcode not in mne_9995_4512.keys():
+            return False
+        line = "{:8}r{}".format(mne_9995_4512[opcode], w)
+        return line
+
     def handleData(self, word, _):
         line = "DATA    {}".format(self.word_to_hex(word))
         return line
 
     def handleFormatHint(self, word, rom):
-        if self.hints.format_note(self.pc-2):
+        form = self.hints.format_note(self.pc-2)
+        if form == "f:data":
             return self.handleData(word, rom)
-        else:
-            return False
+        return False
 
     def disassemble(self):
-
         handlers = [
             self.handleFormatHint,
             self.handle351,
@@ -359,6 +390,7 @@ class ROM:
             self.handle3512,
             self.handle3513,
             self.handle_9995_453,
+            self.handle_9995_4512,
             self.handleData
         ]
 
@@ -375,7 +407,8 @@ class ROM:
                     for handler in handlers:
                         instruction = handler(word, rom)
                         if instruction:
-                            print("\t{:24} ; pc:{} w:{} {}".format(
+                            print("{:6}\t{:24} ; pc:{} w:{} {}".format(
+                                    self.hints.label(pc),
                                     instruction,
                                     self.word_to_hex(pc),
                                     self.word_to_hex(word),

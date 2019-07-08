@@ -28,7 +28,8 @@ from rom import ROM
 @click.option(
         "--cpu",
         default="9900",
-        help="cpu type, one of 9900 or 9995. Defaults to 9900"
+        help="cpu type, one of 9900 or 9995. Defaults to 9900",
+        type=str
 )
 @click.version_option(
         version="0.1",
