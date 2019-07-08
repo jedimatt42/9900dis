@@ -32,4 +32,43 @@ Options:
 9900dis --aorg 6000 --rom sys.bin --listing sys.asm
 ```
 
+user may then edit sys.asm, and modifications will be read back and preserved during
+subsequent disassembling. 
 
+A typical raw output line may be something like:
+
+```
+      	SOCB    @>028a,r2        ; pc:>0000 w:>f0a0 
+```
+
+### Data
+
+The comment line contains the program counter value, and the word at that location in the disassembled ROM.
+
+You may force the disassembly to treat a word as 'DATA' by adding a format code: f:data, as in this example:
+
+```
+      	SOCB    @>028a,r2        ; pc:>0000 w:>f0a0 f:data
+```
+
+re-running the disassembler will then produce:
+
+```
+      	DATA    >f0a0            ; pc:>0000 w:>f0a0 f:data
+```
+
+Additional instructions may follow as parameter words are no longer consumed for that instruction.
+
+### Labels
+
+Labels may be inserted, and they will remain associated to the PC for that line
+
+```
+RESET 	DATA    >f0a0            ; pc:>0000 w:>f0a0 f:data
+```
+
+References will utilized the symbolic label name when re-running the disassembler, such as:
+
+```
+      	BLWP    @RESET           ; pc:>0824 w:>0420 
+```
