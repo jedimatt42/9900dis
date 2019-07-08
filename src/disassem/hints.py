@@ -8,7 +8,7 @@ class Hints:
                 if len(segments) >= 2 and "f:" in segments[1]:
                     (pc, w, f) = self.deconstruct_notes(segments[1])
                     if f:
-                        self.annotations[pc] = f
+                        self.annotations[pc] = f.rstrip()
 
     def deconstruct_notes(self, value):
         parts = value.split(" ")
@@ -20,7 +20,7 @@ class Hints:
         return (pc, w, f)
 
     def format_note(self, pc):
-        if pc and pc in self.annotations:
+        if pc is not None and pc in self.annotations.keys():
             return "f:{}".format(self.annotations[pc])
         else:
             return ""

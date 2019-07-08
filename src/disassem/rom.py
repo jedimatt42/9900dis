@@ -335,9 +335,16 @@ class ROM:
         line = "DATA    {}".format(self.word_to_hex(word))
         return line
 
+    def handleFormatHint(self, word, rom):
+        if self.hints.format_note(self.pc-2):
+            return self.handleData(word, rom)
+        else:
+            return False
+
     def disassemble(self):
 
         handlers = [
+            self.handleFormatHint,
             self.handle351,
             self.handle352,
             self.handle353,
@@ -356,17 +363,20 @@ class ROM:
         ]
 
         with open(self.output, "w") as listing:
-            print("\tAORG\t%s" % self.word_to_hex(self.pc), file=listing)
+            print(
+                    "\tAORG    {:24}".format(self.word_to_hex(self.pc)),
+                    file=listing
+            )
 
             with open(self.filename, "rb") as rom:
                 pc = self.pc
                 word = self.readword(rom)
                 while(word is not None):
                     for handler in handlers:
-                        line = handler(word, rom)
-                        if line:
+                        instruction = handler(word, rom)
+                        if instruction:
                             print("\t{:24} ; pc:{} w:{} {}".format(
-                                    line,
+                                    instruction,
                                     self.word_to_hex(pc),
                                     self.word_to_hex(word),
                                     self.hints.format_note(pc)
