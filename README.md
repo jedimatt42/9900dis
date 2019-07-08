@@ -14,6 +14,7 @@ The output should assemble again using xas99.py from the xdt99 tool suite.
 
 ## Usage
 
+```
 Usage: main.py [OPTIONS]
 
   TMS9900 disassembler by Jedimatt42
@@ -23,8 +24,10 @@ Options:
   --listing PATH  listing file to generate  [required]
   --aorg ADDRESS  the address of the first byte in the input ROM. Specified in
                   hex such as 0x0000
+  --cpu TEXT      cpu type, one of 9900 or 9995. Defaults to 9900
   --version       Show the version and exit.
   --help          Show this message and exit.
+```
 
 ## Examples
 
