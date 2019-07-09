@@ -407,12 +407,13 @@ class ROM:
                     for handler in handlers:
                         instruction = handler(word, rom)
                         if instruction:
-                            print("{:6}\t{:24} ; pc:{} w:{} {}".format(
+                            print("{:6}\t{:24} ; pc:{} w:{} {} {}".format(
                                     self.hints.label(pc),
                                     instruction,
                                     self.word_to_hex(pc),
                                     self.word_to_hex(word),
-                                    self.hints.format_note(pc)
+                                    self.hints.format_note(pc),
+                                    self.hints.comment(pc)
                                 ), file=listing)
                             break
                     pc = self.pc
