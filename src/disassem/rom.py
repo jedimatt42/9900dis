@@ -364,7 +364,7 @@ class ROM:
         return line
 
     def handleData(self, word, _):
-        line = "DATA    {}".format(self.word_to_hex(word))
+        line = "DATA    {}".format(self.hex_or_label(word))
         return line
 
     def handleFormatHint(self, word, rom):
