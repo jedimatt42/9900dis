@@ -290,7 +290,7 @@ class ROM:
         (opcode, dis) = self.deconstruct356(word)
         if opcode not in mne357.keys():
             return False
-        addr = signedByte(dis) + self.pc
+        addr = (2 * signedByte(dis)) + self.pc
         line = "{:8}{}".format(mne357[opcode], self.hex_or_label(addr))
         return line
 
