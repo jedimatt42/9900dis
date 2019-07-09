@@ -76,10 +76,23 @@ References will utilized the symbolic label name when re-running the disassemble
       	BLWP    @RESET           ; pc:>0824 w:>0420 
 ```
 
+### Equates
+
+You may define lines for equates such as
+
+```
+VDPIO	EQU	>E000
+```
+
+When the value is found as a parameter, the equate symbol will be used instead
+
+```
+	MOVB	@VDPIO,r8
+```
+
 ### Comments
 
-Comments may be added after the pc/w/f segment following another ';' semicolon. They will be captured
-and regenerated. 
+Comments may be added after the pc/w/f segment following another ';' semicolon. They will be captured and regenerated. 
 
 ```
       	BLWP    @RESET           ; pc:>0824 w:>0420   ; Go back to title screen

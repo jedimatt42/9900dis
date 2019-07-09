@@ -140,6 +140,9 @@ class ROM:
         return ">" + "{0:#0{1}x}".format(value, 6)[2:]
 
     def hex_or_label(self, value):
+        equ = self.hints.equate(value)
+        if equ:
+            return equ
         label = self.hints.label(value)
         if label:
             return label
@@ -399,6 +402,14 @@ class ROM:
                     "\tAORG    {:24}".format(self.word_to_hex(self.pc)),
                     file=listing
             )
+            for value, symbol in self.hints.all_equates():
+                print(
+                        "{}\tEQU\t{}".format(
+                                symbol,
+                                self.word_to_hex(value)
+                        ),
+                        file=listing
+                )
 
             with open(self.filename, "rb") as rom:
                 pc = self.pc
