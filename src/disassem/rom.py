@@ -259,7 +259,7 @@ class ROM:
         if opcode not in mne353.keys():
             return False
         src_param = self.param351(ts, s, rom)
-        dst_param = "r" + str(d)
+        dst_param = str(d)
         line = "{:8}{},{}".format(mne353[opcode], src_param, dst_param)
         return line
 
