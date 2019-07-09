@@ -1,20 +1,24 @@
+import os
+
+
 class Hints:
     def __init__(self, outputfile):
         self.annotations = {}
         self.labels = {}
         self.comments = {}
-        with open(outputfile, "r") as listing:
-            for line in listing.readlines():
-                segments = line.split(';')
-                if len(segments) >= 2:
-                    (pc, w, f) = self.deconstruct_notes(segments[1])
-                    if f:
-                        self.annotations[pc] = f.strip()
-                    label = segments[0].split('\t')[0].strip()
-                    if label:
-                        self.labels[pc] = label
-                    if len(segments) >= 3:
-                        self.comments[pc] = segments[2].strip()
+        if os.path.isfile(outputfile):
+            with open(outputfile, "r") as listing:
+                for line in listing.readlines():
+                    segments = line.split(';')
+                    if len(segments) >= 2:
+                        (pc, w, f) = self.deconstruct_notes(segments[1])
+                        if f:
+                            self.annotations[pc] = f.strip()
+                        label = segments[0].split('\t')[0].strip()
+                        if label:
+                            self.labels[pc] = label
+                        if len(segments) >= 3:
+                            self.comments[pc] = segments[2].strip()
 
     def deconstruct_notes(self, value):
         parts = value.split(" ")

@@ -75,3 +75,12 @@ References will utilized the symbolic label name when re-running the disassemble
 ```
       	BLWP    @RESET           ; pc:>0824 w:>0420 
 ```
+
+### Comments
+
+Comments may be added after the pc/w/f segment following another ';' semicolon. They will be captured
+and regenerated. 
+
+```
+      	BLWP    @RESET           ; pc:>0824 w:>0420   ; Go back to title screen
+```
