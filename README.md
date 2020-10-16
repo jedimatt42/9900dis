@@ -101,6 +101,9 @@ Comments may be added after the pc/w/f segment following another ';' semicolon. 
 # Running
 
 1. Install pipenv and python3
+
+This varies by platform, so you'll have to use your favorite search engine.
+
 2. create virtual env
 
 ```
@@ -118,3 +121,4 @@ python src/disassem/main.py --help
 
 1. Learn setup.py
 2. Make it an installable python package with command line tool entry script.
+
