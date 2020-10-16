@@ -1,11 +1,11 @@
 # Iterative 9900 disassembly
 
 Good disassembly can need help identifying entrypoints into a ROM.  Particularly when the
-ROM is fronted with some header information. 
+ROM is fronted with some header information.
 
 The TMS9900 series CPUs expect a table of entrypoint addresses at the beginning of the System ROM.
-Cartridges or hardware extension ROMs usually have a list of entrypoints or in the case of the 
-TI-99/4A several lists referenced by a header. 
+Cartridges or hardware extension ROMs usually have a list of entrypoints or in the case of the
+TI-99/4A several lists referenced by a header.
 
 The goal of this disassembler is to output a file that can be used as input again, after the
 user marks up known entry points, and data chunks.
@@ -36,12 +36,12 @@ Options:
 ```
 
 user may then edit sys.asm, and modifications will be read back and preserved during
-subsequent disassembling. 
+subsequent disassembling.
 
 A typical raw output line may be something like:
 
 ```
-      	SOCB    @>028a,r2        ; pc:>0000 w:>f0a0 
+      	SOCB    @>028a,r2        ; pc:>0000 w:>f0a0
 ```
 
 ### Data
@@ -73,7 +73,7 @@ RESET 	DATA    >f0a0            ; pc:>0000 w:>f0a0 f:data
 References will utilized the symbolic label name when re-running the disassembler, such as:
 
 ```
-      	BLWP    @RESET           ; pc:>0824 w:>0420 
+      	BLWP    @RESET           ; pc:>0824 w:>0420
 ```
 
 ### Equates
@@ -92,8 +92,29 @@ When the value is found as a parameter, the equate symbol will be used instead
 
 ### Comments
 
-Comments may be added after the pc/w/f segment following another ';' semicolon. They will be captured and regenerated. 
+Comments may be added after the pc/w/f segment following another ';' semicolon. They will be captured and regenerated.
 
 ```
       	BLWP    @RESET           ; pc:>0824 w:>0420   ; Go back to title screen
 ```
+
+# Running
+
+1. Install pipenv and python3
+2. create virtual env
+
+```
+pipenv install --python 3.8
+```
+
+then:
+
+```
+pipenv shell
+python src/disassem/main.py --help
+```
+
+# TODO
+
+1. Learn setup.py
+2. Make it an installable python package with command line tool entry script.
