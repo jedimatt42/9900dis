@@ -33,7 +33,7 @@ class Hints:
         parts = value.split(" ")
         pc = int(parts[1][4:], 16)
         w = int(parts[2][3:], 16)
-        f = parts[3]
+        f = parts[3] if len(parts) > 3 else None
         return (pc, w, f)
 
     def format_note(self, pc):
