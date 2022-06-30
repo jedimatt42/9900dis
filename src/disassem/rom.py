@@ -309,7 +309,7 @@ class ROM:
         if opcode not in mne359.keys():
             return False
         iop = self.readword(rom)
-        line = "{:8}r{},{}".format(mne359[opcode], w, self.word_to_hex(iop))
+        line = "{:8}r{},{}".format(mne359[opcode], w, self.hex_or_label(iop))
         return line
 
     def handle3510(self, word, rom):
