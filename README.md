@@ -121,4 +121,5 @@ python src/disassem/main.py --help
 
 1. Learn setup.py
 2. Make it an installable python package with command line tool entry script.
+3. sync between gitlab and github
 
