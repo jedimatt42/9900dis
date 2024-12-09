@@ -100,6 +100,14 @@ Comments may be added after the pc/w/f segment following another ';' semicolon. 
 
 # Running
 
+## From binary release
+
+unzip the release archive for your platform. It will contain a single executable file named `9900dis` or `9900dis.exe`
+
+Run it, such as: `9900dis.exe --help` 
+
+## From Source
+
 1. Install pipenv and python3
 
 This varies by platform, so you'll have to use your favorite search engine.
@@ -107,7 +115,7 @@ This varies by platform, so you'll have to use your favorite search engine.
 2. create virtual env
 
 ```
-pipenv install --python 3.8
+pipenv install --python 3.12
 ```
 
 then:
@@ -117,8 +125,4 @@ pipenv shell
 python src/disassem/main.py --help
 ```
 
-# TODO
-
-1. Learn setup.py
-2. Make it an installable python package with command line tool entry script.
 
